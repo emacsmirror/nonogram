@@ -16,31 +16,38 @@
 
 (defconst np-colors
   '((space   . (:bg "none"    :fg nil      :ch nil))
-    (blank   . (:bg "#D8DCFF" :fg "#8890C8" :ch "·"))
-    (filled  . (:bg "#1A4A90" :fg "#E8F4FF" :ch "X"))
-    (crossed . (:bg "#C0C5E0" :fg "#6870A0" :ch "·"))
-    (cursor  . (:bg "#D49010" :fg "#FFF5C0" :ch "?"))
-    (clue    . (:bg "none"    :fg "#4A5AB0" :ch nil)))
+    (blank   . (:bg "#FFFFFF" :fg nil      :ch nil))
+    (filled  . (:bg "#111111" :fg nil      :ch nil))
+    (crossed . (:bg "#FFFFFF" :fg "#222222" :ch "X"))
+    (cursor  . (:bg "#FFF5A0" :fg "#664400" :ch nil))
+    (clue    . (:bg "none"    :fg "#111111" :ch nil)))
   "Color and character definitions for each cell kind.")
 
-;; Game cells draw their fill rect inset by 1px on all sides.
-;; Adjacent cells thus have a 2px gap filled by the Emacs buffer
-;; background (white), creating clearly visible grid lines without
-;; any SVG stroke tricks.
+;; Game cells: full SVG has a black background rect, then the colored
+;; fill rect inset by 1px. Adjacent cells share the 1px black border
+;; on each side → 2px black grid line between cells. Space/clue cells
+;; stay transparent (no black backing).
+(defconst np-grid-color "#111111" "Color of the grid lines between cells.")
+
 (defun np--svg (kind &optional override-ch)
   "Return an SVG image spec for cell KIND, optionally with OVERRIDE-CH as label."
-  (let* ((spec  (alist-get kind np-colors))
-         (bg    (plist-get spec :bg))
-         (fg    (plist-get spec :fg))
-         (ch    (or override-ch (plist-get spec :ch)))
-         (px    np-cell-px)
-         (inner (- px 2))
-         (half  (/ px 2))
-         (fsize (round (* px 0.52)))
-         (rect  (if (string= bg "none")
-                    ""
-                  (format "<rect x='1' y='1' width='%d' height='%d' fill='%s'/>"
-                          inner inner bg)))
+  (let* ((spec     (alist-get kind np-colors))
+         (bg       (plist-get spec :bg))
+         (fg       (plist-get spec :fg))
+         (ch       (or override-ch (plist-get spec :ch)))
+         (px       np-cell-px)
+         (inner    (- px 2))
+         (half     (/ px 2))
+         (fsize    (round (* px 0.52)))
+         (game-p   (not (string= bg "none")))
+         (backing  (if game-p
+                       (format "<rect width='%d' height='%d' fill='%s'/>"
+                               px px np-grid-color)
+                     ""))
+         (rect     (if game-p
+                       (format "<rect x='1' y='1' width='%d' height='%d' fill='%s'/>"
+                               inner inner bg)
+                     ""))
          (body  (if (and ch fg)
                     (format (concat "<text x='%d' y='%d' "
                                     "text-anchor='middle' "
@@ -52,8 +59,8 @@
                   ""))
          (svg   (format (concat "<svg xmlns='http://www.w3.org/2000/svg' "
                                 "width='%d' height='%d'>"
-                                "%s%s</svg>")
-                        px px rect body)))
+                                "%s%s%s</svg>")
+                        px px backing rect body)))
     (create-image svg 'svg t :ascent 'center)))
 
 ;; Each call to np--cell-img returns a FRESH image object.
@@ -94,7 +101,7 @@
   :group 'nonogram-preview)
 
 (defface np-face-row-clue
-  '((t :foreground "#7B82B5" :family "monospace"))
+  '((t :foreground "#111111" :family "monospace"))
   "Row clue text."
   :group 'nonogram-preview)
 
@@ -135,14 +142,16 @@
 
 ;; Cell kinds per row×col: blank filled crossed cursor
 (defconst np-grid
-  '((crossed filled  filled  filled  filled  filled  filled  crossed)  ; 0 solved
-    (filled  crossed crossed crossed crossed crossed crossed filled)   ; 1 solved
-    (filled  crossed filled  crossed crossed filled  crossed filled)   ; 2 solved (eyes)
-    (filled  blank   blank   cursor  blank   blank   blank   filled)   ; 3 partial
-    (filled  crossed filled  filled  filled  filled  crossed filled)   ; 4 solved (smile)
-    (filled  blank   blank   blank   blank   blank   blank   filled)   ; 5 partial
-    (blank   blank   blank   blank   blank   blank   blank   blank)    ; 6 untouched
-    (crossed crossed filled  filled  filled  filled  crossed crossed))) ; 7 solved
+  ;; blank=vacía(blanco), filled=marcada(negro), crossed=posibilidad(blanco+X)
+  '((blank   filled  filled  filled  filled  filled  filled  blank)    ; 0
+    (filled  blank   blank   blank   blank   blank   blank   filled)   ; 1
+    (filled  blank   filled  blank   blank   filled  blank   filled)   ; 2 ojos
+    (filled  crossed crossed cursor  crossed crossed crossed filled)   ; 3 posibilidades
+    (filled  blank   filled  filled  filled  filled  blank   filled)   ; 4 sonrisa
+    (filled  crossed crossed crossed crossed crossed crossed filled)   ; 5 posibilidades
+    (blank   blank   blank   blank   blank   blank   blank   blank)    ; 6 vacío
+    (blank   blank   filled  filled  filled  filled  blank   blank))  ; 7
+  )
 
 (defconst np-annotations nil)
 
