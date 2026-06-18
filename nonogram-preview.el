@@ -12,7 +12,12 @@
 ;; Column-clue cells are also SVG of the same size → exact alignment.
 ;; ──────────────────────────────────────────────────────────────────
 
-(defconst np-cell-px 22 "Cell size in pixels (width = height → square).")
+(defcustom np-cell-px 22
+  "Size in pixels of each grid cell (width = height).
+Increase for larger displays; decrease for compact layouts.
+Call `nonogram-preview' again after changing this value."
+  :type 'integer
+  :group 'nonogram-preview)
 
 (defconst np-colors
   '((space   . (:bg "none"    :fg nil      :ch nil))
