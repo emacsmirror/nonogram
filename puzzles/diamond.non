@@ -1,0 +1,22 @@
+title "Diamond"
+by "Andros Fenollosa"
+license CC0-1.0
+width 7
+height 7
+rows
+1
+3
+5
+7
+5
+3
+1
+columns
+1
+3
+5
+7
+5
+3
+1
+goal "0001000001110001111101111111011111000111000001000"

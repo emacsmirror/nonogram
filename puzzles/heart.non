@@ -1,0 +1,21 @@
+title "Heart"
+by "Andros Fenollosa"
+license CC0-1.0
+width 7
+height 6
+rows
+2,2
+7
+7
+5
+3
+1
+columns
+2
+4
+5
+5
+5
+4
+2
+goal "011011011111111111111011111000111000001000"

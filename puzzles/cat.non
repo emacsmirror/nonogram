@@ -1,0 +1,22 @@
+title "Cat"
+by "Andros Fenollosa"
+license CC0-1.0
+width 7
+height 7
+rows
+1,1
+2,2
+7
+1,1,1,1
+7
+1,3,1
+1,1
+columns
+6
+2,1,1
+4
+1,2
+4
+2,1,1
+6
+goal "1000001110001111111111010101111111110111010100010"
