@@ -1,61 +1,134 @@
-# nonogram.el
+# Nonogram for Emacs
 
-Play nonogram puzzles (also known as picross, griddlers or hanjie) inside
-Emacs. The whole board, including the clue numbers, is drawn with SVG on a
-solid white background, so it stays legible under any theme, light or dark.
+Play nonogram puzzles (also known as picross, griddlers or hanjie) in Emacs, on an SVG board that stays legible under any theme, light or dark.
+
+Requires Emacs 27.1 or later, built with SVG support (librsvg).
+
+Fill the grid so that each row and column matches its clue numbers and a hidden picture appears. Puzzles are plain `.non` files (Steven Simpson's format, as exported by [webpbn.com](https://webpbn.com)), and the package can download and update them from a remote source.
+
+## Buffers
+
+### Puzzle list (`M-x nonogram`)
+
+```
+ Nonogram   RET play   U update   q quit
+
+Arrow    7×7
+Cat      7×7
+Check    7×7
+Diamond  7×7
+Heart    7×6
+Smiley   8×8
+```
+
+### Game board (`RET` on a puzzle)
+
+The board is drawn with SVG; every cell, including the clue numbers, sits on a solid white background. The clue numbers frame the grid on the top and left:
+
+```
+            1     1
+            1 1 1 1
+          1 1 1 1 1 1
+        5 1 1 1 1 1 1 5
+      6 · ■ ■ ■ ■ ■ ■ ·
+    1 1 ■ · · · · · · ■
+1 1 1 1 ■ · ■ · · ■ · ■
+    1 1 ■ · · · · · · ■
+  1 4 1 ■ · ■ ■ ■ ■ · ■
+    1 1 ■ · · · · · · ■
+    1 1 · ■ · · · · ■ ·
+      4 · · ■ ■ ■ ■ · ·
+```
+
+Below the board a legend lists the controls. A cell can be empty, filled (black), crossed out in red for cells you rule out, or marked with a small dot for cells you suspect are filled.
 
 ## Features
 
-- SVG board that reads well on light and dark themes.
-- Keyboard and mouse play.
-- Puzzles are plain `.non` files (Steven Simpson's format, as exported by
-  [webpbn.com](https://webpbn.com)); drop your own into the puzzles directory.
-- Win detection by clues, so puzzles with more than one valid picture work.
+- **All-white SVG board**: the grid and the clue numbers are rendered as SVG on a solid white background, so they stay legible under any theme, light or dark.
+- **Three cell marks**: fill a cell black, cross it out (a cell you believe is empty) or leave a dot hint (a cell you suspect is filled).
+- **Keyboard and mouse**: move with the arrows or `h j k l`; fill, cross and dot with keys or the three mouse buttons.
+- **Clue-based win detection**: you win when the filled cells satisfy every row and column clue, so puzzles with more than one valid picture work.
+- **.non puzzle files**: puzzles are plain text in Steven Simpson's format; drop your own into the puzzle directory or export them from webpbn.com.
+- **Download and update**: fetch the puzzle set from a Gitea repository, and re-download to update, without leaving Emacs.
+- **Undo**: step back through your marks one at a time.
 
-## Requirements
+## Keymap
 
-Emacs 27.1 or newer, built with SVG support (librsvg). Check with:
+### Puzzle list
+
+| Key               | Description                   |
+|-------------------|-------------------------------|
+| `RET` / `mouse-1` | Play the puzzle at point      |
+| `n` / `p`         | Move down / up                |
+| `U`               | Download / update the puzzles |
+| `g`               | Refresh the list              |
+| `q`               | Quit                          |
+
+### Game board
+
+| Key                | Description                    |
+|--------------------|--------------------------------|
+| `SPC` / `mouse-1`  | Toggle a filled (black) cell   |
+| `x` / `mouse-3`    | Toggle a cross mark            |
+| `c` / `mouse-2`    | Toggle a dot hint              |
+| arrows / `h j k l` | Move the cursor                |
+| `n`                | Load a random puzzle           |
+| `u`                | Undo the last mark             |
+| `q`                | Back to the puzzle list        |
+
+## Installation
+
+### MELPA
+
+```
+M-x package-install RET nonogram RET
+```
+
+### use-package with :vc (Emacs 29+)
 
 ```elisp
-(image-type-available-p 'svg)
+(use-package nonogram
+  :vc (:url "https://git.andros.dev/andros/nonogram.el"
+       :rev :newest))
+```
+
+### use-package with :load-path
+
+For manual installation or Emacs < 29:
+
+```elisp
+(use-package nonogram
+  :load-path "/path/to/nonogram.el")
+```
+
+### Manual
+
+Clone the repository and place it on your `load-path`:
+
+```sh
+git clone https://git.andros.dev/andros/nonogram.el.git
+```
+
+Then add to your init file:
+
+```elisp
+(add-to-list 'load-path "/path/to/nonogram.el")
+(require 'nonogram)
 ```
 
 ## Usage
 
-```
-M-x nonogram
-```
+1. Run `M-x nonogram` to open the puzzle list.
+2. Move with `n` and `p` and press `RET` to play the puzzle at point.
+3. Fill cells with `SPC` (or left-click), cross out cells with `x` (right-click) and leave dot hints with `c` (middle-click).
+4. You win when the filled cells match every row and column clue.
+5. Press `q` to return to the list, or `n` for a random puzzle.
 
-This opens a list of the puzzles found in `nonogram-puzzle-directory`. Move
-with `n` / `p` and press `RET` to play the one under point.
+If the puzzle directory is empty the first time you open the list, Nonogram offers to download a set of puzzles. Press `U` in the list, or run `M-x nonogram-download-puzzles`, to re-download and update them at any time.
 
-### In-game controls
+## Puzzle format
 
-| Key             | Action                                   |
-|-----------------|------------------------------------------|
-| `SPC` / `mouse-1` | toggle a filled (black) cell           |
-| `x` / `mouse-3`   | toggle a cross mark (a cell you think is empty) |
-| arrows / `h j k l` | move the cursor                        |
-| `n`             | load a random puzzle                     |
-| `u`             | undo the last mark                       |
-| `q`             | back to the puzzle list                  |
-
-## Downloading and updating puzzles
-
-If `nonogram-puzzle-directory` is empty the first time you open the list,
-Nonogram offers to download a set of puzzles from
-`nonogram-puzzle-source-url` (a Gitea contents-API URL). This is handy after
-a MELPA install, where the bundled `puzzles/` directory may not be present.
-
-Press `U` in the list, or run `M-x nonogram-download-puzzles`, at any time to
-re-download every puzzle, overwriting the local copies. Point
-`nonogram-puzzle-source-url` at any Gitea repository directory to use your own
-collection.
-
-## Adding puzzles
-
-Puzzles live in `nonogram-puzzle-directory` (by default the `puzzles/`
-directory next to `nonogram.el`) as `.non` files:
+Puzzles are `.non` files in Steven Simpson's format:
 
 ```
 title "Smiley"
@@ -72,30 +145,35 @@ columns
 goal "0111111010000001..."
 ```
 
-Clue blocks are comma-separated. If the file omits `rows`/`columns`, they are
-derived from the `goal` grid. You can export any puzzle from webpbn.com in the
-"NON — Steve Simpson" format and drop it in.
+Clue blocks within a line are comma-separated. If a file omits the `rows` and `columns` clues, they are derived from the `goal` grid. You can export any puzzle from webpbn.com in the "NON — Steve Simpson" format and drop it into `nonogram-puzzle-directory`.
 
-## Installation
+## Customization
 
-Until it is on MELPA, clone the repository and load it:
+Run `M-x customize-group RET nonogram RET` to list all available options.
 
-```elisp
-(add-to-list 'load-path "/path/to/nonogram.el")
-(require 'nonogram)
-```
+Key options:
 
-### MELPA recipe
+- `nonogram-cell-px` (default `26`): size in pixels of each board cell.
+- `nonogram-puzzle-directory`: directory scanned for `.non` files (default: the `puzzles` directory next to the package).
+- `nonogram-puzzle-source-url`: Gitea contents-API URL listing the downloadable puzzles.
+- `nonogram-auto-download` (default `t`): offer to download puzzles when the directory is empty.
+- `nonogram-background-color` (default `"#FFFFFF"`): board background, drawn as a solid SVG fill.
+- `nonogram-filled-color` (default `"#111111"`): filled cells and grid lines.
+- `nonogram-cross-color` (default `"#B03030"`): cross marks.
+- `nonogram-dot-color` (default `"#111111"`): dot hints.
+- `nonogram-clue-color` (default `"#111111"`): clue numbers.
+- `nonogram-cursor-color` (default `"#E8901A"`): the ring that marks the cursor.
 
-Because the puzzles ship as data files, the recipe must include them:
+## Contributing
 
-```elisp
-(nonogram
- :fetcher git
- :url "https://git.andros.dev/andros/nonogram.el.git"
- :files ("*.el" "puzzles"))
-```
+Contributions are welcome! Please see the [contribution guidelines](https://git.andros.dev/andros/contribute) for instructions on how to submit issues or pull requests.
 
 ## License
 
-Code is GPLv3 (see `LICENSE`). The bundled puzzles are released under CC0-1.0.
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
+
+The bundled puzzles are released under CC0-1.0.
