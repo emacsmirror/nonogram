@@ -1,6 +1,6 @@
 # Nonogram for Emacs
 
-Play nonogram puzzles (also known as picross, griddlers or hanjie) in Emacs, on an SVG board that stays legible under any theme, light or dark.
+Play nonogram puzzles (also known as picross, griddlers or hanjie) in Emacs.
 
 Requires Emacs 27.1 or later, built with SVG support (librsvg).
 
@@ -41,16 +41,6 @@ The board is drawn with SVG; every cell, including the clue numbers, sits on a s
 ```
 
 Below the board a legend lists the controls. A cell can be empty, filled (black), crossed out in red for cells you rule out, or marked with a small dot for cells you suspect are filled.
-
-## Features
-
-- **All-white SVG board**: the grid and the clue numbers are rendered as SVG on a solid white background, so they stay legible under any theme, light or dark.
-- **Three cell marks**: fill a cell black, cross it out (a cell you believe is empty) or leave a dot hint (a cell you suspect is filled).
-- **Keyboard and mouse**: move with the arrows or `h j k l`; fill, cross and dot with keys or the three mouse buttons.
-- **Clue-based win detection**: you win when the filled cells satisfy every row and column clue, so puzzles with more than one valid picture work.
-- **.non puzzle files**: puzzles are plain text in Steven Simpson's format; drop your own into the puzzle directory or export them from webpbn.com.
-- **Download and update**: fetch the puzzle set from a Gitea repository, and re-download to update, without leaving Emacs.
-- **Undo**: step back through your marks one at a time.
 
 ## Keymap
 
@@ -93,21 +83,6 @@ For manual installation or Emacs < 29:
 ```elisp
 (use-package nonogram
   :load-path "/path/to/nonogram.el")
-```
-
-### Manual
-
-Clone the repository and place it on your `load-path`:
-
-```sh
-git clone https://git.andros.dev/andros/nonogram.el.git
-```
-
-Then add to your init file:
-
-```elisp
-(add-to-list 'load-path "/path/to/nonogram.el")
-(require 'nonogram)
 ```
 
 ## Usage
