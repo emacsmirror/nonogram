@@ -44,7 +44,7 @@
 
 ;;   SPC or mouse-1   toggle a filled (black) cell
 ;;   x   or mouse-3   toggle a cross mark (a cell you believe is empty)
-;;   .   or mouse-2   toggle a dot hint (a cell you suspect is filled)
+;;   c   or mouse-2   toggle a dot hint (a cell you suspect is filled)
 ;;   arrows / h j k l move the cursor
 ;;   n                load a random puzzle
 ;;   u                undo the last mark
@@ -382,7 +382,7 @@ position so mouse clicks and refreshes can find it."
 (defconst nonogram--help
   '(("SPC / click"       . "fill a cell")
     ("x / right-click"   . "cross a cell")
-    (". / middle-click"  . "mark a maybe dot")
+    ("c / middle-click"  . "mark a maybe dot")
     ("arrows / h j k l"  . "move")
     ("n"                 . "random puzzle")
     ("u"                 . "undo")
@@ -605,7 +605,7 @@ it does not count as filled for solving."
     (define-key map (kbd "RET") #'nonogram-toggle-fill)
     (define-key map (kbd "x")   #'nonogram-toggle-cross)
     (define-key map (kbd "X")   #'nonogram-toggle-cross)
-    (define-key map (kbd ".")   #'nonogram-toggle-dot)
+    (define-key map (kbd "c")   #'nonogram-toggle-dot)
     (define-key map (kbd "<up>")    #'nonogram-move-up)
     (define-key map (kbd "<down>")  #'nonogram-move-down)
     (define-key map (kbd "<left>")  #'nonogram-move-left)
@@ -658,22 +658,20 @@ it does not count as filled for solving."
   (let ((inhibit-read-only t)
         (files (nonogram--puzzle-files)))
     (erase-buffer)
-    (insert (propertize "  Nonogram\n" 'face '(bold (:height 1.3))))
-    (insert (propertize "  Choose a puzzle and press RET\n\n" 'face 'shadow))
+    (setq-local header-line-format " Nonogram   RET play   q quit")
     (if (null files)
-        (insert (format "  No .non files in %s\n" nonogram-puzzle-directory))
+        (insert (format "No .non files in %s\n" nonogram-puzzle-directory))
       (dolist (file files)
         (let* ((p (nonogram--parse-non file))
                (w (or (plist-get p :width)  (length (plist-get p :columns))))
                (h (or (plist-get p :height) (length (plist-get p :rows)))))
-          (insert (propertize (format "  %-16s  %d×%d\n"
-                                      (plist-get p :name) w h)
-                              'nonogram-file file
-                              'mouse-face 'highlight)))))
-    (insert (propertize "\n  RET play   n/p move   q quit\n" 'face 'shadow))
-    (goto-char (point-min))
-    (let ((pos (next-single-property-change (point-min) 'nonogram-file)))
-      (when pos (goto-char pos)))))
+          (insert (propertize
+                   (concat (plist-get p :name)
+                           (propertize (format "  %d×%d" w h) 'face 'shadow)
+                           "\n")
+                   'nonogram-file file
+                   'mouse-face 'highlight)))))
+    (goto-char (point-min))))
 
 (defun nonogram-menu-open ()
   "Play the puzzle on the current line."
