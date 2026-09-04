@@ -114,7 +114,32 @@ columns
 goal "0111111010000001..."
 ```
 
-Clue blocks within a line are comma-separated. If a file omits the `rows` and `columns` clues, they are derived from the `goal` grid. You can export any puzzle from webpbn.com in the "NON — Steve Simpson" format and drop it into `nonogram-puzzle-directory`.
+Clue blocks within a line are comma-separated. If a file omits the `rows` and `columns` clues, they are derived from the `goal` grid.
+
+## Adding puzzles
+
+Drop `.non` files into `nonogram-puzzle-directory` (or, to share them through the download feature, commit them under `puzzles/` in the repository and push; the directory is listed dynamically, so `U` / `M-x nonogram-download-puzzles` picks them up automatically).
+
+There are two easy ways to get a `.non` file:
+
+**Export an existing one.** Pick a puzzle on [webpbn.com](https://webpbn.com), open the export tool at [webpbn.com/export.cgi](https://webpbn.com/export.cgi), choose the **NON — Steve Simpson** format and save the result with a `.non` extension. Note that most webpbn puzzles are copyrighted by their authors; only redistribute the ones whose author allows it (see the [webpbn survey](https://webpbn.com/survey/), which lists puzzles released under a Creative Commons licence).
+
+**Write one by hand.** Only the picture is required, since the clues are derived from it:
+
+```
+title "Star"
+width 5
+height 5
+goal "0010011111011101111100100"
+```
+
+The `goal` is the grid read left to right, top to bottom, with `1` for a filled cell and `0` for an empty one (here, five rows of five). Add explicit `rows` and `columns` clue lines only if you want to override the derived clues.
+
+Online resources:
+
+- [webpbn.com](https://webpbn.com) — create, browse and export puzzles.
+- [webpbn.com/export.cgi](https://webpbn.com/export.cgi) — export tool with the NON format.
+- [webpbn.com/survey](https://webpbn.com/survey/) — puzzle sets, some under Creative Commons.
 
 ## Customization
 
