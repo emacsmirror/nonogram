@@ -78,12 +78,6 @@ Below the board a legend lists the controls. A cell can be empty, filled (black)
 
 ## Installation
 
-### MELPA
-
-```
-M-x package-install RET nonogram RET
-```
-
 ### use-package with :vc (Emacs 29+)
 
 ```elisp
