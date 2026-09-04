@@ -483,15 +483,12 @@ position so mouse clicks and refreshes can find it."
   (let ((game nonogram--game)
         (width (apply #'max (mapcar (lambda (e) (length (car e)))
                                     nonogram--help))))
-    (insert (propertize (format " %s\n\n" (nonogram-game-name game))
-                        'face 'bold))
+    (insert (format " %s\n\n" (nonogram-game-name game)))
     (when (nonogram-game-won game)
-      (insert (propertize " Solved!  n for another · q for the list\n\n"
-                          'face 'success)))
+      (insert " Solved!  n for another · q for the list\n\n"))
     (let ((fmt (format " %%-%ds  %%s\n" width)))
       (dolist (entry nonogram--help)
-        (insert (propertize (format fmt (car entry) (cdr entry))
-                            'face 'shadow))))))
+        (insert (format fmt (car entry) (cdr entry)))))))
 
 (defun nonogram--goto-cursor ()
   "Move point onto the current cursor cell."
