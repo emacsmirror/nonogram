@@ -40,6 +40,11 @@
 ;; (files in Steven Simpson's .non format).  Move with n and p and press
 ;; RET to play the puzzle under point.
 
+;; If the directory is empty, Nonogram offers to download a set of
+;; puzzles from `nonogram-puzzle-source-url'.  Press U in the list (or
+;; run M-x nonogram-download-puzzles) at any time to re-download and
+;; update them.
+
 ;; In-game controls:
 
 ;;   SPC or mouse-1   toggle a filled (black) cell
@@ -104,6 +109,19 @@ any theme."
   (expand-file-name "puzzles" nonogram--load-directory)
   "Directory scanned for puzzle files in Steven Simpson's .non format."
   :type 'directory)
+
+(defcustom nonogram-puzzle-source-url
+  "https://git.andros.dev/api/v1/repos/andros/nonogram.el/contents/puzzles"
+  "Gitea contents-API URL listing the downloadable .non puzzles.
+`nonogram-download-puzzles' reads this listing and fetches every
+file it names.  Point it at any Gitea repository directory."
+  :type 'string)
+
+(defcustom nonogram-auto-download t
+  "When non-nil, offer to download puzzles if the directory is empty.
+The offer is made when the puzzle list is opened with no local
+puzzles present."
+  :type 'boolean)
 
 ;; ──────────────────────────────────────────────────────────────────
 ;; Game state
@@ -234,6 +252,77 @@ Steven Simpson's .non, as exported by webpbn.com."
   (when (file-directory-p nonogram-puzzle-directory)
     (sort (directory-files nonogram-puzzle-directory t "\\.non\\'")
           #'string<)))
+
+;; ──────────────────────────────────────────────────────────────────
+;; Downloading puzzles
+;; ──────────────────────────────────────────────────────────────────
+
+(defun nonogram--http-get-once (url)
+  "Fetch URL once.  Return (STATUS . BODY); BODY is nil unless STATUS is 200."
+  (require 'url)
+  (let ((buffer (url-retrieve-synchronously url t t 30)))
+    (unless buffer
+      (error "Could not connect to %s" url))
+    (unwind-protect
+        (with-current-buffer buffer
+          (goto-char (point-min))
+          (unless (re-search-forward "\\`HTTP/[0-9.]+ \\([0-9]+\\)" nil t)
+            (error "Malformed response from %s" url))
+          (let ((status (string-to-number (match-string 1))))
+            (if (/= status 200)
+                (cons status nil)
+              (goto-char (point-min))
+              (unless (re-search-forward "\r?\n\r?\n" nil t)
+                (error "No response body from %s" url))
+              (cons 200 (buffer-substring-no-properties (point) (point-max))))))
+      (kill-buffer buffer))))
+
+(defun nonogram--http-get (url)
+  "Return the body of an HTTP GET request to URL as a string.
+Retry a few times, backing off, when the server answers 429 or 503.
+Signal an error on a network failure or any other non-200 status."
+  (let ((attempts 4)
+        (delay 1))
+    (catch 'done
+      (while t
+        (let* ((res (nonogram--http-get-once url))
+               (status (car res)))
+          (cond
+           ((= status 200) (throw 'done (cdr res)))
+           ((and (memq status '(429 503)) (> attempts 1))
+            (setq attempts (1- attempts))
+            (sleep-for delay)
+            (setq delay (* delay 2)))
+           (t (error "HTTP %d while fetching %s" status url))))))))
+
+;;;###autoload
+(defun nonogram-download-puzzles ()
+  "Download all puzzles from `nonogram-puzzle-source-url'.
+The files are written to `nonogram-puzzle-directory', overwriting
+existing ones.  Run it to populate an empty directory or to update
+the local puzzles to the latest published set.  Return the number
+of puzzles downloaded."
+  (interactive)
+  (let* ((listing (nonogram--http-get nonogram-puzzle-source-url))
+         (entries (json-parse-string listing
+                                     :object-type 'alist :array-type 'list))
+         (dir nonogram-puzzle-directory)
+         (count 0))
+    (make-directory dir t)
+    (dolist (entry entries)
+      (let ((name (alist-get 'name entry))
+            (type (alist-get 'type entry))
+            (url  (alist-get 'download_url entry)))
+        (when (and (equal type "file") url
+                   (stringp name) (string-suffix-p ".non" name))
+          (when (> count 0) (sleep-for 0.2))
+          (let ((body (nonogram--http-get url)))
+            (with-temp-file (expand-file-name name dir)
+              (insert body)))
+          (setq count (1+ count)))))
+    (message "Downloaded %d puzzle%s to %s"
+             count (if (= count 1) "" "s") (abbreviate-file-name dir))
+    count))
 
 ;; ──────────────────────────────────────────────────────────────────
 ;; SVG cell rendering
@@ -644,6 +733,7 @@ it does not count as filled for solving."
     (define-key map (kbd "j")       #'next-line)
     (define-key map (kbd "k")       #'previous-line)
     (define-key map (kbd "g")       #'nonogram-menu)
+    (define-key map (kbd "U")       #'nonogram-menu-update)
     map)
   "Keymap for `nonogram-menu-mode'.")
 
@@ -658,7 +748,7 @@ it does not count as filled for solving."
   (let ((inhibit-read-only t)
         (files (nonogram--puzzle-files)))
     (erase-buffer)
-    (setq-local header-line-format " Nonogram   RET play   q quit")
+    (setq-local header-line-format " Nonogram   RET play   U update   q quit")
     (if (null files)
         (insert (format "No .non files in %s\n" nonogram-puzzle-directory))
       (dolist (file files)
@@ -682,12 +772,27 @@ it does not count as filled for solving."
       (nonogram-mode)
       (nonogram--start file))))
 
+(defun nonogram-menu-update ()
+  "Download the latest puzzles and refresh the list."
+  (interactive)
+  (nonogram-download-puzzles)
+  (nonogram--draw-menu))
+
 ;;;###autoload
 (defun nonogram-menu ()
-  "Show the list of available nonogram puzzles."
+  "Show the list of available nonogram puzzles.
+When the directory is empty and `nonogram-auto-download' is on,
+offer to download the default puzzle set first."
   (interactive)
   (unless (image-type-available-p 'svg)
     (user-error "Nonogram needs an Emacs built with SVG (librsvg) support"))
+  (when (and nonogram-auto-download
+             (null (nonogram--puzzle-files))
+             (y-or-n-p "No puzzles found.  Download the default set? "))
+    (condition-case err
+        (nonogram-download-puzzles)
+      (error (message "Puzzle download failed: %s"
+                      (error-message-string err)))))
   (let ((buf (get-buffer-create "*nonogram*")))
     (with-current-buffer buf
       (nonogram-menu-mode)

@@ -40,6 +40,18 @@ with `n` / `p` and press `RET` to play the one under point.
 | `u`             | undo the last mark                       |
 | `q`             | back to the puzzle list                  |
 
+## Downloading and updating puzzles
+
+If `nonogram-puzzle-directory` is empty the first time you open the list,
+Nonogram offers to download a set of puzzles from
+`nonogram-puzzle-source-url` (a Gitea contents-API URL). This is handy after
+a MELPA install, where the bundled `puzzles/` directory may not be present.
+
+Press `U` in the list, or run `M-x nonogram-download-puzzles`, at any time to
+re-download every puzzle, overwriting the local copies. Point
+`nonogram-puzzle-source-url` at any Gitea repository directory to use your own
+collection.
+
 ## Adding puzzles
 
 Puzzles live in `nonogram-puzzle-directory` (by default the `puzzles/`
