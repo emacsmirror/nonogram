@@ -25,20 +25,7 @@ Smiley   8×8
 
 The board is drawn with SVG; every cell, including the clue numbers, sits on a solid white background. The clue numbers frame the grid on the top and left:
 
-```
-            1     1
-            1 1 1 1
-          1 1 1 1 1 1
-        5 1 1 1 1 1 1 5
-      6 · ■ ■ ■ ■ ■ ■ ·
-    1 1 ■ · · · · · · ■
-1 1 1 1 ■ · ■ · · ■ · ■
-    1 1 ■ · · · · · · ■
-  1 4 1 ■ · ■ ■ ■ ■ · ■
-    1 1 ■ · · · · · · ■
-    1 1 · ■ · · · · ■ ·
-      4 · · ■ ■ ■ ■ · ·
-```
+![Nonogram game board](images/gameboard.png)
 
 Below the board a legend lists the controls. A cell can be empty, filled (black), crossed out in red for cells you rule out, or marked with a small dot for cells you suspect are filled.
 
