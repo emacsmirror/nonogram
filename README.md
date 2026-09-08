@@ -10,15 +10,25 @@ Fill the grid so that each row and column matches its clue numbers and a hidden 
 
 ### Puzzle list (`M-x nonogram`)
 
+The 33 bundled puzzles are ordered from easiest to hardest, growing from small 5×5 pictures to an 80×95 one:
+
 ```
  Nonogram   RET play   U update   q quit
 
-Arrow    7×7
-Cat      7×7
-Check    7×7
-Diamond  7×7
-Heart    7×6
-Smiley   8×8
+Plus                          5×5
+T                             5×5
+A                             5×5
+...
+Ring                          15×15
+Rhombus                       15×15
+Big heart                     20×20
+Scardy Cat                    20×20
+Party at the Right [...]      27×23
+Probably Not                  34×34
+Swing                         45×45
+You light up my life          50×45
+For Merka                     55×60
+Faase                         80×95
 ```
 
 ### Game board (`RET` on a puzzle)
@@ -107,6 +117,8 @@ Clue blocks within a line are comma-separated. If a file omits the `rows` and `c
 
 Drop `.non` files into `nonogram-puzzle-directory` (or, to share them through the download feature, commit them under `puzzles/` in the repository and push; the directory is listed dynamically, so `U` / `M-x nonogram-download-puzzles` picks them up automatically).
 
+The list is sorted by file name, so the bundled puzzles use a numeric prefix (`01-`, `02-`, …) to order them by difficulty. The prefix is not shown in the list; only the `title` field is. Follow the same convention to slot a new puzzle into the ramp.
+
 There are two easy ways to get a `.non` file:
 
 **Export an existing one.** Pick a puzzle on [webpbn.com](https://webpbn.com), open the export tool at [webpbn.com/export.cgi](https://webpbn.com/export.cgi), choose the **NON — Steve Simpson** format and save the result with a `.non` extension. Note that most webpbn puzzles are copyrighted by their authors; only redistribute the ones whose author allows it (see the [webpbn survey](https://webpbn.com/survey/), which lists puzzles released under a Creative Commons licence).
@@ -157,4 +169,4 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
 
-The bundled puzzles are released under CC0-1.0.
+The puzzles authored by Andros Fenollosa are released under CC0-1.0. The remaining puzzles come from the sample set of Jan Wolter's [Survey of Paint-by-Number Puzzle Solvers](https://webpbn.com/survey/); their authors gave permission to redistribute them freely as long as the attribution is kept (an arrangement the survey describes as equivalent to a Creative Commons Attribution licence). Each `.non` keeps its `by` and `copyright` fields, and [CREDITS.md](CREDITS.md) lists them.
