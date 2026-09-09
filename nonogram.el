@@ -4,6 +4,7 @@
 
 ;; Author: Andros Fenollosa <hi@andros.dev>
 ;; Maintainer: Andros Fenollosa <hi@andros.dev>
+;; Assisted-by: Claude:claude-opus-4-8
 ;; URL: https://git.andros.dev/andros/nonogram.el
 ;; Version: 1.0.0
 ;; Package-Requires: ((emacs "27.1"))
