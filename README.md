@@ -65,6 +65,29 @@ Below the board a legend lists the controls. A cell can be empty, filled (black)
 
 ## Installation
 
+### MELPA
+
+nonogram is available on [MELPA](https://melpa.org/#/nonogram):
+
+```
+M-x package-install RET nonogram RET
+```
+
+**Note:** Make sure you have MELPA configured in your Emacs. If not, add this to your init.el:
+
+```elisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+```
+
+With use-package:
+
+```elisp
+(use-package nonogram
+  :ensure t)
+```
+
 ### use-package with :vc (Emacs 29+)
 
 ```elisp

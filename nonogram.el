@@ -56,6 +56,12 @@
 ;;   u                undo the last mark
 ;;   q                back to the puzzle list
 
+;; Credits: most bundled puzzles were authored by Andros Fenollosa and
+;; are released under CC0-1.0.  The rest come from Jan Wolter's
+;; Paint-by-Number puzzle survey (https://webpbn.com/survey/) and are
+;; redistributed with attribution; each puzzle file keeps its author and
+;; copyright, and CREDITS.md in the source repository lists them all.
+
 ;;; Code:
 
 (require 'cl-lib)
